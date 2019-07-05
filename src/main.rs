@@ -24,19 +24,7 @@ fn main()-> io::Result<()> {
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(
-                web::resource("/clients")
-                    .route(web::get().to_async(api::clients::index))
-                    .route(web::post().to_async(api::clients::new_customer)),
-            )
-            .service(
-                web::resource("/get_client").route(web::get().to_async(api::clients::get_by_id)),
-            )
-            .service(
-                web::resource("/del_client").route(web::post().to_async(api::clients::del_by_id)),
-            )
-            .service(
-                web::resource("/update_client")
-                    .route(web::post().to_async(api::clients::update_customer)),
+                web::resource("/friends").route(web::get().to_async(api::users::get_friends)),
             )
     };
     HttpServer::new(app)
