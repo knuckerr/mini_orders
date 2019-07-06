@@ -56,7 +56,7 @@ pub fn rows_to_struct(row: Row) -> Result<User, Error> {
     let social_urls = row
         .get_opt("social_urls")
         .ok_or(err_msg("social_urls key not exist"))?
-        .unwrap_or(json!(r#"{"twiter": "", "facebook": "", "instagram": ""}"#));
+        .unwrap_or(json!({"twiter": "", "facebook": "", "instagram": ""}));
     let socials:Social = serde_json::from_value(social_urls)?;
     let description = handle_error_str("description",&row)?;
     let show_friends = handle_error_bool("show_friends",&row)?;
