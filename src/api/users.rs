@@ -4,14 +4,12 @@ use crate::model::user;
 use actix_web::web::{Query};
 use actix_web::{web, Error, HttpResponse};
 use futures::future::Future;
-
 use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct UserQuery {
     id: i32,
 }
-
 
 pub fn get_friends(
     pool: web::Data<connection::PgPool>,

@@ -26,6 +26,7 @@ fn main()-> io::Result<()> {
             .service(
                 web::resource("/friends").route(web::get().to_async(api::users::get_friends)),
             )
+            .service(web::resource("/ws/").route(web::get().to(api::socket_friend::ws)))
     };
     HttpServer::new(app)
         .bind("localhost:8088")?

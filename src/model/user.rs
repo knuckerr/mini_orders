@@ -17,6 +17,14 @@ pub struct User {
    pub  public: bool,
    pub  active: bool,
 }
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Users {
+   pub  users: Vec<User>,
+}
+
+
 #[derive(Debug,Serialize, Deserialize)]
 pub struct Social {
   twiter: String,
@@ -91,4 +99,33 @@ pub fn get_friends(conn: &PgPool,id:i32) -> Result<Vec<User>, Error> {
         users.push(user)
     }
     Ok(users)
+}
+
+
+pub fn unseen_friend_requests(conn: &PgPool,id:i32) -> Result<Vec<User>, Error> {
+    let mut users = Vec::new();
+    let conn = conn.get()?;
+    let query = r#"
+    select users.* from users
+    inner join friend_request on friend_request.request_id = users.id
+    where friend_request.request_id NOT IN(select friend_id from seen_requests)
+    and friend_request.user_id = $1
+        "#;
+    let rows = conn.query(query, &[&id])?;
+    for row in rows.into_iter() {
+        let user = rows_to_struct(row)?;
+        users.push(user)
+    }
+    Ok(users)
+}
+
+pub fn mark_seen_request(conn:&PgPool,users:Vec<User>,id:i32) -> Result<(),Error>{
+    if users.len() > 0 {
+        let conn = conn.get()?;
+        for user in users {
+            let query = r#" INSERT INTO seen_requests(friend_id,user_id) VALUES($1,$2)"#;
+            conn.execute(query,&[&user.id, &id])?;
+        }
+    }
+    Ok(())
 }
