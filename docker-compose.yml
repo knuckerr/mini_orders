@@ -18,3 +18,12 @@ services:
             POSTGRES_USER: root
             POSTGRES_PASSWORD: root
             POSTGRES_DB: common
+    redis:
+        container_name: "redis"
+        image: redis
+        ports:
+          - "6379:6379"
+        volumes:
+          - ../data/redis:/data
+        entrypoint: redis-server --appendonly yes
+        restart: always

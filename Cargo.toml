@@ -17,10 +17,14 @@ futures = "0.1.27"
 failure = "0.1.5"
 log = "0.4.0"
 env_logger = "0.6.2"
+chrono = { version = "0.4", features = ["serde"] }
 actix-web-actors = "1.0.1"
 actix = "0.8.3"
 
 [dependencies.postgres]
-version = "0.15"
-features = ["with-rustc-serialize","with-serde_json"]
+version = "0.15.2"
+features = ["with-chrono","with-serde_json"]
 optional = true
+
+[dependencies.redis]
+version = "*"

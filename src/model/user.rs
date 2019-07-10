@@ -1,8 +1,9 @@
-use crate::common::connection::PgPool;
+use crate::common::connection::{PgPool,handle_error_str,handle_error_bool,handle_error_i32};
 use failure::{err_msg, Error};
 use postgres::rows::Row;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use chrono::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
@@ -16,6 +17,17 @@ pub struct User {
    pub  show_places: bool,
    pub  public: bool,
    pub  active: bool,
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FriendRequest {
+   pub  id: i32,
+   pub accept: String,
+   pub request_id:i32,
+   pub user_id:i32,
+   pub msg:String,
+   pub when: DateTime<Local>
 }
 
 
@@ -34,30 +46,9 @@ pub struct Social {
 
 
 
-pub fn handle_error_str(key:&str,row:&Row) -> Result<String,Error> {
-    let err = format!("{} not exist",key);
-    let data = row.get_opt(key)
-        .ok_or(err_msg(err))?
-        .unwrap_or(String::from("None"));
-    Ok(data)
-}
-
-
-pub fn handle_error_bool(key:&str,row:&Row) -> Result<bool,Error> {
-    let err = format!("{} not exist",key);
-    let data = row.get_opt(key)
-        .ok_or(err_msg(err))?
-        .unwrap_or(false);
-    Ok(data)
-}
-
-
 
 pub fn rows_to_struct(row: Row) -> Result<User, Error> {
-    let id = row
-        .get_opt("id")
-        .ok_or(err_msg("id key not exist"))?
-        .unwrap_or(0);
+    let id = handle_error_i32("id",&row)?;
     let username = handle_error_str("username",&row)?;
     let email = handle_error_str("email",&row)?;
     let avatar_img = handle_error_str("avatar_img",&row)?;

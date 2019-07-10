@@ -16,11 +16,13 @@ use std::io;
 fn main()-> io::Result<()> {
     let db = Database::new("root", "root", "common", "localhost", 5432);
     let pool = db.connection().expect("Cannot connect to database");
+    let redis_pool = redis::Client::open("redis://127.0.0.1/").expect("cannot connect to redis");
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
     let app = move || {
         App::new()
             .data(pool.clone())
+            .data(redis_pool.clone())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(

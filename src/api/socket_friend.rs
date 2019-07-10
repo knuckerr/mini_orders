@@ -1,23 +1,29 @@
-use actix_web::{web, Error, HttpResponse,HttpRequest};
-use std::time::{Instant,Duration};
-use actix_web_actors::ws;
-use actix::prelude::*;
 use crate::common::connection;
-use crate::model::user::{unseen_friend_requests,Users,mark_seen_request};
+use actix::prelude::*;
+use actix_web::{web, Error, HttpRequest, HttpResponse};
+use actix_web_actors::ws;
+use std::time::{Duration, Instant};
 
 // How often heartbeat pings are sent
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 
-pub fn ws(r: HttpRequest, stream: web::Payload,pool: web::Data<connection::PgPool>) -> Result<HttpResponse, Error> {
+pub fn ws(
+    r: HttpRequest,
+    stream: web::Payload,
+    pool: web::Data<connection::PgPool>,
+    redis: web::Data<redis::Client>,
+) -> Result<HttpResponse, Error> {
+    let r_conn = redis.get_connection().unwrap();
     println!("{:?}", r);
-    let res = ws::start(MyWebSocket::new(&pool), &r, stream)?;
+    let res = ws::start(MyWebSocket::new(&pool, r_conn), &r, stream)?;
     Ok(res)
 }
 
 pub struct MyWebSocket {
     pub hb: Instant,
-    pub pool :connection::PgPool,
+    pub pool: connection::PgPool,
+    pub redis: redis::Connection,
 }
 
 impl Actor for MyWebSocket {
@@ -39,21 +45,6 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for MyWebSocket {
                 ctx.pong(&msg);
             }
             ws::Message::Pong(_) => {
-                let users = unseen_friend_requests(&self.pool,1);
-                match users {
-                    Ok(users) => {
-                        let data = Users{users:users};
-                        let json_data = serde_json::to_string(&data);
-                        if json_data.is_ok(){
-                            let mark = mark_seen_request(&self.pool,data.users,1);
-                            match mark {
-                                Ok(_) => ctx.text(json_data.unwrap()),
-                                Err(_) => {}
-                            }
-                        }
-                    }
-                    Err(_) => {}
-                }
                 self.hb = Instant::now();
             }
             ws::Message::Text(text) => ctx.text(text),
@@ -67,8 +58,12 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for MyWebSocket {
 }
 
 impl MyWebSocket {
-    pub fn new(pool:&connection::PgPool) -> Self {
-        Self { hb: Instant::now(),pool:pool.to_owned() }
+    pub fn new(pool: &connection::PgPool, redis: redis::Connection) -> Self {
+        Self {
+            hb: Instant::now(),
+            pool: pool.to_owned(),
+            redis: redis,
+        }
     }
 
     /// helper method that sends ping to client every second.
