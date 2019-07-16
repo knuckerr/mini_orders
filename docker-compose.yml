@@ -7,7 +7,7 @@ services:
         restart:
             always
         ports:
-            - "8000:80"
+            - "8088:80"
     dbPostgres:
         image: postgres:10
         container_name: "postgres"

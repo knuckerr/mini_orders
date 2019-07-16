@@ -7,6 +7,8 @@ use serde_json;
 use r2d2_postgres::r2d2::Pool;
 use r2d2_postgres::PostgresConnectionManager;
 use postgres::rows::Row;
+use postgres_shared::types::FromSql;
+
 
 
 define_encode_set! {
@@ -64,28 +66,10 @@ impl<'a> Database<'a> {
 }
 
 
-pub fn handle_error_str(key:&str,row:&Row) -> Result<String,Error> {
+pub fn handle_error<T: Default + FromSql>(key:&str,row:&Row) -> Result<T,Error> {
     let err = format!("{} not exist",key);
     let data = row.get_opt(key)
         .ok_or(err_msg(err))?
-        .unwrap_or(String::from("None"));
-    Ok(data)
-}
-
-
-pub fn handle_error_bool(key:&str,row:&Row) -> Result<bool,Error> {
-    let err = format!("{} not exist",key);
-    let data = row.get_opt(key)
-        .ok_or(err_msg(err))?
-        .unwrap_or(false);
-    Ok(data)
-}
-
-
-pub fn handle_error_i32(key:&str,row:&Row) -> Result<i32,Error> {
-    let err = format!("{} not exist",key);
-    let data = row.get_opt(key)
-        .ok_or(err_msg(err))?
-        .unwrap_or(0);
+        .unwrap_or_default(); // this is more idiomatic as Adam pointed out
     Ok(data)
 }
