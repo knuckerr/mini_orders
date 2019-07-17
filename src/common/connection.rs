@@ -29,18 +29,18 @@ pub struct Database<'a> {
 
 impl<'a> Database<'a> {
     pub fn new(
-        user: &'a str,
-        pass: &'a str,
-        db: &'a str,
-        ip: &'a str,
-        port: i32,
+        user_: &'a str,
+        pass_: &'a str,
+        db_: &'a str,
+        ip_: &'a str,
+        port_: i32,
     ) -> Database<'a> {
         Database {
-            user: user,
-            pass: pass,
-            db: db,
-            ip: ip,
-            port: port,
+            user: user_,
+            pass: pass_,
+            db: db_,
+            ip: ip_,
+            port: port_,
         }
     }
     pub fn connection(&self) -> Result<PgPool,Error> {
@@ -59,8 +59,7 @@ impl<'a> Database<'a> {
         let mut data = String::new();
         file.read_to_string(&mut data)?;
         let db : Database =  serde_json::from_str(&data)?;
-        let con = db.connection();
-        con
+        db.connection()
 
     }
 }
@@ -69,7 +68,7 @@ impl<'a> Database<'a> {
 pub fn handle_error<T: Default + FromSql>(key:&str,row:&Row) -> Result<T,Error> {
     let err = format!("{} not exist",key);
     let data = row.get_opt(key)
-        .ok_or(err_msg(err))?
+        .ok_or_else(|| err_msg(err))?
         .unwrap_or_default(); // this is more idiomatic as Adam pointed out
     Ok(data)
 }

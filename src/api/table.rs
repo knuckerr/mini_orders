@@ -39,7 +39,7 @@ pub fn get_table(
     query: web::Query<HashMap<String, String>>,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
     web::block(move || {
-        let name = query.get("name").ok_or(err_msg("missing the name value"))?;
+        let name = query.get("name").ok_or_else(||err_msg("missing the name value"))?;
         table::get_table_sumary(&pool, &name)
     })
     .then(move |res| match res {
@@ -59,7 +59,7 @@ pub fn new_table(
     query: web::Query<HashMap<String, String>>,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
     web::block(move || {
-        let name = query.get("name").ok_or(err_msg("missing the name value"))?;
+        let name = query.get("name").ok_or_else(||err_msg("missing the name value"))?;
         table::new_table(&pool, &name)
     })
     .then(move |res| match res {
@@ -79,7 +79,7 @@ pub fn del_table(
     query: web::Query<HashMap<String, String>>,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
     web::block(move || {
-        let name = query.get("name").ok_or(err_msg("missing the name value"))?;
+        let name = query.get("name").ok_or_else(||err_msg("missing the name value"))?;
         table::del_table(&pool, &name)
     })
     .then(move |res| match res {
@@ -118,11 +118,11 @@ pub fn range_table(
     web::block(move || {
         let from: i32 = query
             .get("from")
-            .ok_or(err_msg("missing the from value"))?
+            .ok_or_else(|| err_msg("missing the from value"))?
             .parse()?;
         let to: i32 = query
             .get("to")
-            .ok_or(err_msg("missing the to value"))?
+            .ok_or_else(|| err_msg("missing the to value"))?
             .parse()?;
         table::generate_table(&pool, from, to)
     })

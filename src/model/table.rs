@@ -20,9 +20,9 @@ pub struct TableSumary {
 }
 
 pub fn table_to_struct(row: &Row) -> Result<Table, Error> {
-    let id = handle_error("id", row)?;
-    let name = handle_error("name", row)?;
-    Ok(Table { id: id, name: name })
+    let id_ = handle_error("id", row)?;
+    let name_ = handle_error("name", row)?;
+    Ok(Table { id: id_, name: name_ })
 }
 
 pub fn get_all_tables(conn: &PgPool) -> Result<Vec<Table>, Error> {
@@ -39,15 +39,15 @@ pub fn get_all_tables(conn: &PgPool) -> Result<Vec<Table>, Error> {
 }
 
 pub fn table_sumary_struct(row: &Row) -> Result<TableSumary, Error> {
-    let table = table_to_struct(row)?;
-    let total = handle_error("total", row)?;
-    let item_total = handle_error("item_total", row)?;
-    let last_order = row.get("last_order");
+    let table_ = table_to_struct(row)?;
+    let total_ = handle_error("total", row)?;
+    let item_total_ = handle_error("item_total", row)?;
+    let last_order_ = row.get("last_order");
     let sumary = TableSumary {
-        table: table,
-        item_total: item_total,
-        total: total,
-        last_order: last_order,
+        table: table_,
+        item_total: item_total_,
+        total: total_,
+        last_order: last_order_,
     };
     Ok(sumary)
 }
