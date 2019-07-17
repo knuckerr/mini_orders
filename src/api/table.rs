@@ -51,3 +51,42 @@ pub fn new_table(
         })
         .from_err()
 }
+
+
+pub fn del_table(
+    pool: web::Data<connection::PgPool>,
+    query: web::Query<HashMap<String, String>>
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || {
+        let name = query.get("name").ok_or(err_msg("missing the name value"))?;
+        table::del_table(&pool,&name)
+    })
+        .then(move |res| match res {
+            Ok(tasks) => Ok(HttpResponse::Ok().json(tasks)),
+            Err(e) => {
+                dbg!(e);
+                Err(ServiceError::BadRequest("missing the name value".to_string()))
+            }
+        })
+        .from_err()
+}
+
+
+pub fn range_table(
+    pool: web::Data<connection::PgPool>,
+    query: web::Query<HashMap<String,String>>
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || {
+        let from:i32 = query.get("from").ok_or(err_msg("missing the from value"))?.parse()?;
+        let to:i32 = query.get("to").ok_or(err_msg("missing the to value"))?.parse()?;
+        table::generate_table(&pool,from,to)
+    })
+        .then(move |res| match res {
+            Ok(tasks) => Ok(HttpResponse::Ok().json(tasks)),
+            Err(e) => {
+                dbg!(e);
+                Err(ServiceError::BadRequest("missing the from & to  value".to_string()))
+            }
+        })
+        .from_err()
+}
