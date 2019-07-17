@@ -1,6 +1,6 @@
-# rust-webapp
-This a basic rest-api build with Rust . This project for me is aiming to understand and learn Rust 
-and gain the experience using Rust as a back end Server
+# mini_orders
+This a basic rest-api build with Rust . This project for me is aiming to understand and learn Rust & Help my Girlfirend in her work to make a mini program for her  that track the orders she wanted something simple and easy to use
+I am going to use Vue for front end
 
 # Running the DB
 This app is using postgres 10 version  
