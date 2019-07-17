@@ -74,6 +74,29 @@ pub fn get_tables_sumary(conn: &PgPool) -> Result<Vec<TableSumary>, Error> {
     Ok(tables)
 }
 
+pub fn get_table_sumary(conn: &PgPool,name:&str) -> Result<Vec<TableSumary>, Error> {
+    let mut tables = Vec::new();
+    let conn = conn.get()?;
+    let query = r#"
+    select tables."name",tables."id",
+    Coalesce(SUM (orders."quantity" * items."price"),0)::real as total ,
+    Coalesce(SUM(orders."quantity")::int,0) as item_total,
+    Coalesce(MAX (orders."time"),to_timestamp(0)::timestamp) as last_order
+    from tables
+    full outer join orders on orders."table_id" = tables."id"
+    full outer join items on items."id" = orders."item_id"
+    where tables."name" = 1
+    group by tables."name",tables."id"
+    ORDER BY tables."name"
+    "#;
+    let rows = conn.query(query, &[&name])?;
+    for row in rows.into_iter() {
+        let table = table_sumary_struct(&row)?;
+        tables.push(table)
+    }
+    Ok(tables)
+}
+
 pub fn new_table(conn: &PgPool, name: &str) -> Result<Msg, Error> {
     let conn = conn.get()?;
     let exist = conn.query("SELECT * FROM tables WHERE name=$1", &[&name])?;
@@ -106,10 +129,22 @@ pub fn del_table(conn: &PgPool, name: &str) -> Result<Msg, Error> {
     Ok(msg)
 }
 
+
+pub fn update_table(conn: &PgPool,table:&Table) -> Result<Msg, Error> {
+    let conn = conn.get()?;
+    conn.execute(r#" UPDATE tables SET name=$1 WHERE id=$1  "#, &[&table.name,&table.id])?;
+    let msg = Msg {
+        msg: "Success".to_string(),
+        query: "DELETE".to_string(),
+        status: 200,
+    };
+    Ok(msg)
+}
+
 pub fn generate_table(conn: &PgPool, from: i32, to: i32) -> Result<Vec<Msg>, Error> {
     let conn = conn.get()?;
     let mut msgs = Vec::new();
-    if from <= 100 {
+    if from <= 100 && to >= 0 {
         for name in from..to + 1 {
             let exist = conn.query("SELECT * FROM tables WHERE name=$1", &[&name.to_string()])?;
             if exist.into_iter().len() == 0 {
