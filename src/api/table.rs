@@ -76,11 +76,10 @@ pub fn new_table(
 
 pub fn del_table(
     pool: web::Data<connection::PgPool>,
-    query: web::Query<HashMap<String, String>>,
+    query: web::Json<Vec<i32>>,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
     web::block(move || {
-        let name = query.get("name").ok_or_else(||err_msg("missing the name value"))?;
-        table::del_table(&pool, &name)
+        table::del_table(&pool,&query)
     })
     .then(move |res| match res {
         Ok(tasks) => Ok(HttpResponse::Ok().json(tasks)),

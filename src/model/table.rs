@@ -11,6 +11,7 @@ pub struct Table {
     pub name: String,
 }
 
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TableSumary {
     table: Table,
@@ -63,6 +64,7 @@ pub fn get_tables_sumary(conn: &PgPool) -> Result<Vec<TableSumary>, Error> {
     from tables
     full outer join orders on orders."table_id" = tables."id"
     full outer join items on items."id" = orders."item_id"
+    where tables."name" is not null
     group by tables."name",tables."id"
     ORDER BY tables."name"
     "#;
@@ -85,7 +87,8 @@ pub fn get_table_sumary(conn: &PgPool,name:&str) -> Result<Vec<TableSumary>, Err
     from tables
     full outer join orders on orders."table_id" = tables."id"
     full outer join items on items."id" = orders."item_id"
-    where tables."name" = 1
+    where tables."name" = $1
+    and tables."name" is not null
     group by tables."name",tables."id"
     ORDER BY tables."name"
     "#;
@@ -118,9 +121,12 @@ pub fn new_table(conn: &PgPool, name: &str) -> Result<Msg, Error> {
     }
 }
 
-pub fn del_table(conn: &PgPool, name: &str) -> Result<Msg, Error> {
+pub fn del_table(conn: &PgPool,tables:&Vec<i32>) -> Result<Msg, Error> {
     let conn = conn.get()?;
-    conn.execute(r#" DELETE FROM tables WHERE name=$1"#, &[&name])?;
+    for table in tables {
+        conn.execute(r#" DELETE FROM tables WHERE id=$1"#, &[&table])?;
+        conn.execute(r#" DELETE FROM orders WHERE table_id=$1"#, &[&table])?;
+    }
     let msg = Msg {
         msg: "Success".to_string(),
         query: "DELETE".to_string(),
