@@ -2,8 +2,9 @@ import tables from '../api/tables';
 
 export default {
   FetchSummaryTables: ({commit}) => {
-    tables.GetSummaryTables()
-      .then((res) => {
+    tables
+      .GetSummaryTables()
+      .then(res => {
         commit('SETSUMMARY', res.data);
       })
       .catch(error => {
@@ -11,7 +12,8 @@ export default {
       });
   },
   FetchSummaryTable: ({commit}, name) => {
-    tables.GetSummaryTable(name)
+    tables
+      .GetSummaryTable(name)
       .then(res => {
         commit('TABLESUMMARY', res.data);
       })
@@ -21,13 +23,33 @@ export default {
       });
   },
   CreateTable: ({commit}, name) => {
-    tables.newTable(name)
+    tables
+      .newTable(name)
+      .then(res => {
+        if (res.data.status == 200) {
+          tables
+            .GetSummaryTable(name)
+            .then(res => {
+              commit('NEWTABLE', res.data);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  },
+  CreateTables: ({commit},range) => {
+    tables
+      .GenerateRangeTables(range.from,range.to)
       .then(() => {
-        tables.GetSummaryTable(name)
+        tables
+          .GetSummaryTables()
           .then(res => {
-            commit('NEWTABLE', res.data);
+            commit('SETSUMMARY', res.data);
           })
-
           .catch(error => {
             console.error(error);
           });
@@ -36,8 +58,10 @@ export default {
         console.error(error);
       });
   },
+
   RemoveTable: ({commit}, id) => {
-    tables.DeleteTable(id)
+    tables
+      .DeleteTable(id)
       .then(() => {
         commit('DELETETABLE', id);
       })
@@ -47,7 +71,8 @@ export default {
   },
 
   RemoveTables: ({commit}, selectitems) => {
-    tables.DeleteTables(selectitems)
+    tables
+      .DeleteTables(selectitems)
       .then(() => {
         commit('DELETETABLES', selectitems);
       })
@@ -56,4 +81,3 @@ export default {
       });
   },
 };
-

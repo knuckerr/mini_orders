@@ -15,6 +15,9 @@ export default {
     },
     GetSummaryTable(name) {
         return api().get('/table?name=' + name)
+    },
+    GenerateRangeTables(from,to){
+        return api().post('/range_table?from='+from+'&to='+to)
     }
 
 }

@@ -36,8 +36,7 @@ fn main() -> io::Result<()> {
             .service(web::resource("/tables").route(web::get().to_async(api::table::get_tables)))
             .service(web::resource("/table").route(web::get().to_async(api::table::get_table)))
             .service(
-                web::resource("/sumary_tables")
-                    .route(web::get().to_async(api::table::sumary_tables)),
+                web::resource("/sumary_tables").route(web::get().to_async(api::table::sumary_tables)),
             )
             .service(web::resource("/new_table").route(web::post().to_async(api::table::new_table)))
             .service(web::resource("/del_table").route(web::post().to_async(api::table::del_table)))
