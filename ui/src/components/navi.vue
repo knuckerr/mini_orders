@@ -9,3 +9,11 @@
         </nav>
     </div>
 </template>
+<style scope>
+.navbar {
+    background-color: #d9534f;
+}
+a,a:hover{
+    color: white;
+}
+</style>

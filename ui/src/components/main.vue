@@ -1,23 +1,42 @@
 <template>
     <div class="container-fluid">
-    <div class="row">
-        <div class="col-xs-4">
-            <div class="input-group">
-                <input class="form-control" v-model="newitem" placeholder="New item">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" @click="additem()" type="button">Button</button>
+        <div class="row">
+            <div class="col-md-2">
+                <div class="input-group">
+                    <input class="form-control" v-model="newitem" placeholder="New item">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" @click="additem()" type="button">Add</button>
+                    </div>
                 </div>
             </div>
-        </div>
+            <div class="col-md-2">
+                <div class="input-group">
+                    <input class="form-control" v-model="filter" placeholder="Search">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" :disabled="!filter" @click="filter=''" type="button">Clear</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                <select class="form-control" v-model="perPage">
+                    <option v-for="page in pageOptions" v-bind:key="page">
+                    {{page}}
+                    </option>
+                </select>
+                </div>
+            </div>
 
-    </div>
+        </div>
         <b-table
             show-empty
             stacked="md"
             :items="todos"
             :fields="fields"
+            :filter="filter"
             :current-page="currentPage"
             :per-page="perPage"
+            @filtered="onFiltered"
             >
             <template slot="HEAD_select">
                 <input type="checkbox" v-model="selectall" @click="Toggleall">
@@ -52,6 +71,10 @@ export default {
             selectitems: [],
             newitem: null,
             selectall:false,
+            filter: '',
+            totalrows:0,
+            perPage: 5,
+            pageOptions: [5, 10, 15],
             fields: [
                 'select',
                 'method',
@@ -62,7 +85,6 @@ export default {
             ],
             currentPage: 1,
             perPage: 10,
-            pageOptions: [5, 10, 15],
             sortBy: null,
         };
     },
@@ -83,18 +105,25 @@ export default {
 
             }
             this.selectitems = all;
+        },
+        onFiltered(items){
+            this.totalrows = items.length;
+            this.currentPage = 1;
         }
     },
     created() {
         this.$store.dispatch('FetchSummaryTables');
     },
+    watch:{
+        todos(){
+            this.selectitems = [];
+            this.selectall = false;
+            this.totalrows = this.todos.length;
+        },
+    },
     computed: {
         todos() {
-            this.selectitems = [];
             return this.$store.getters.tableSelectForm;
-        },
-        totalrows() {
-            return this.$store.getters.totalTables;
         },
     },
 };
