@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 #[macro_use]
 extern crate percent_encoding;
-use actix_web::middleware::Logger;
-use actix_web::http::header;
-use actix_web::{web, App, HttpServer};
 use actix_cors::Cors;
+use actix_web::http::header;
+use actix_web::middleware::Logger;
+use actix_web::{web, App, HttpServer};
 
 extern crate env_logger;
 extern crate log;
@@ -41,7 +41,10 @@ fn main() -> io::Result<()> {
             )
             .service(web::resource("/new_table").route(web::post().to_async(api::table::new_table)))
             .service(web::resource("/del_table").route(web::post().to_async(api::table::del_table)))
-            .service(web::resource("/update_table").route(web::post().to_async(api::table::update_table)))
+            .service(
+                web::resource("/update_table")
+                    .route(web::post().to_async(api::table::update_table)),
+            )
             .service(
                 web::resource("/range_table").route(web::post().to_async(api::table::range_table)),
             )
