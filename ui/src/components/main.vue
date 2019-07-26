@@ -64,6 +64,24 @@
         </div>
       </div>
       <div class="col-md-2">
+        <div class="input-group">
+          <select class="form-control" v-model="action">
+            <option v-for="action in actions" v-bind:key="action">
+            {{action}} selected
+            </option>
+          </select>
+          <div class="input-group-append">
+            <button
+              class="btn btn-outline-secondary"
+              @click="selected_action()"
+              type="button"
+            >
+              Action
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
         <div class="form-group">
           <select class="form-control" v-model="perPage">
             <option v-for="page in pageOptions" v-bind:key="page">
@@ -141,6 +159,8 @@ export default {
       selectall: false,
       filter: '',
       totalrows: 0,
+      action:null,
+      actions:['delete','clear'],
       pageOptions: [5, 10, 15],
       fields: [
         'select',
@@ -165,6 +185,16 @@ export default {
     additem() {
       this.$store.dispatch('CreateTable', this.newitem);
       this.newitem = '';
+    },
+    selected_action(){
+      if(this.selectitems.length > 0){
+        if(this.action == 'delete selected'){
+          this.$store.dispatch('RemoveTables',this.selectitems);
+        }else{
+          this.$store.dispatch('ClearTables',this.selectitems);
+        }
+      }
+      this.action = '';
     },
     new_range_items() {
       let from = parseInt(this.range.from);
