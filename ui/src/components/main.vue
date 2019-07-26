@@ -76,7 +76,7 @@
     <b-table
       show-empty
       stacked="md"
-      :items="todos"
+      :items="tables"
       :fields="fields"
       :filter="filter"
       :current-page="currentPage"
@@ -91,7 +91,9 @@
         <input type="checkbox" v-model="selectitems" :value="item.item.id" />
       </template>
 
-      <template slot="method" slot-scope="item">
+      <template slot="methods" slot-scope="item">
+        <div class="row">
+          <div class="col-sm-2">
         <button
           type="button"
           class="btn btn-sm btn-danger"
@@ -99,6 +101,17 @@
         >
           Delete
         </button>
+          </div>
+          <div class="col-sm-2">
+        <button
+          type="button"
+          class="btn btn-sm btn-primary"
+          @click="clear(item.item.id)"
+        >
+        Clear
+        </button>
+          </div>
+        </div>
       </template>
     </b-table>
     <b-row>
@@ -131,7 +144,7 @@ export default {
       pageOptions: [5, 10, 15],
       fields: [
         'select',
-        'method',
+        'methods',
         {key: 'name', label: 'Name', sortable: true},
         {key: 'item_total', label: 'Items', sortable: true},
         {key: 'total', label: 'Amount', sortable: true},
@@ -146,15 +159,20 @@ export default {
     remove(item) {
       this.$store.dispatch('RemoveTable', item);
     },
+    clear(item) {
+      this.$store.dispatch('ClearTables',[item]);
+    },
     additem() {
       this.$store.dispatch('CreateTable', this.newitem);
       this.newitem = '';
     },
     new_range_items() {
+      let from = parseInt(this.range.from);
+      let to = parseInt(this.range.to);
       if (
-        this.range.from >= 0 &&
-        this.range.to > 0 &&
-        this.range.from < this.range.to
+        from > 0 &&
+        to > 0 &&
+        to > from
       ) {
         this.$store.dispatch('CreateTables',this.range);
         this.range.from = '';
@@ -164,7 +182,7 @@ export default {
     Toggleall() {
       let all = [];
       if (!this.selectall) {
-        this.todos.forEach(function(data) {
+        this.tables.forEach(function(data) {
           all.push(data.id);
         });
       }
@@ -179,14 +197,14 @@ export default {
     this.$store.dispatch('FetchSummaryTables');
   },
   watch: {
-    todos() {
+    tables() {
       this.selectitems = [];
       this.selectall = false;
-      this.totalrows = this.todos.length;
+      this.totalrows = this.tables.length;
     },
   },
   computed: {
-    todos() {
+    tables() {
       return this.$store.getters.tableSelectForm;
     },
   },

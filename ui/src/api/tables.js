@@ -7,6 +7,10 @@ export default {
     DeleteTable(id) {
         return api().post('/del_table', [id])
     },
+
+    ClearTables(selected) {
+        return api().post('/clear_orders',selected)
+    },
     GetSummaryTables(){
         return api().get('/sumary_tables');
     },

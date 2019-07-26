@@ -93,6 +93,26 @@ pub fn del_table(
     .from_err()
 }
 
+
+pub fn clear_orders(
+    pool: web::Data<connection::PgPool>,
+    query: web::Json<Vec<i32>>,
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || {
+        table::clear_orders(&pool,&query)
+    })
+    .then(move |res| match res {
+        Ok(tasks) => Ok(HttpResponse::Ok().json(tasks)),
+        Err(e) => {
+            dbg!(e);
+            Err(ServiceError::BadRequest(
+                "missing the name value".to_string(),
+            ))
+        }
+    })
+    .from_err()
+}
+
 pub fn update_table(
     pool: web::Data<connection::PgPool>,
     table: web::Json<table::Table>,

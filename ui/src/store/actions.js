@@ -59,6 +59,24 @@ export default {
       });
   },
 
+  ClearTables: ({commit},selected) => {
+    tables
+      .ClearTables(selected)
+      .then(() => {
+        tables
+          .GetSummaryTables()
+          .then(res => {
+            commit('SETSUMMARY', res.data);
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  },
+
   RemoveTable: ({commit}, id) => {
     tables
       .DeleteTable(id)

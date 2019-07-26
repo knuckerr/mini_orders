@@ -136,6 +136,20 @@ pub fn del_table(conn: &PgPool,tables:&Vec<i32>) -> Result<Msg, Error> {
 }
 
 
+pub fn clear_orders(conn: &PgPool,tables:&Vec<i32>) -> Result<Msg,Error> {
+    let conn = conn.get()?;
+    for table in tables{
+        conn.execute("DELETE FROM orders WHERE table_id=$1",&[&table])?;
+    }
+    let msg = Msg {
+        msg: "Success".to_string(),
+        query: "Clear orders".to_string(),
+        status: 200,
+    };
+    Ok(msg)
+}
+
+
 pub fn update_table(conn: &PgPool,table:&Table) -> Result<Msg, Error> {
     let conn = conn.get()?;
     conn.execute(r#" UPDATE tables SET name=$1 WHERE id=$1  "#, &[&table.name,&table.id])?;

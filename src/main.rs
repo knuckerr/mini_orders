@@ -40,6 +40,7 @@ fn main() -> io::Result<()> {
             )
             .service(web::resource("/new_table").route(web::post().to_async(api::table::new_table)))
             .service(web::resource("/del_table").route(web::post().to_async(api::table::del_table)))
+            .service(web::resource("/clear_orders").route(web::post().to_async(api::table::clear_orders)))
             .service(
                 web::resource("/update_table")
                     .route(web::post().to_async(api::table::update_table)),
