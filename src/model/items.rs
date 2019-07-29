@@ -36,7 +36,7 @@ pub struct NewItem {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct TableItem {
+pub struct OrderItem {
     pub id: i32,
     pub table_id:i32,
     pub name: String,
@@ -66,7 +66,7 @@ pub fn item_to_struct(row: &Row) -> Result<Item, Error> {
     Ok(sumary)
 }
 
-pub fn table_item_to_struct(row: &Row) -> Result<TableItem, Error> {
+pub fn table_item_to_struct(row: &Row) -> Result<OrderItem, Error> {
     let id_ = handle_error("id", row)?;
     let table_id_ = handle_error("table_id",row)?;
     let name_ = handle_error("name", row)?;
@@ -76,7 +76,7 @@ pub fn table_item_to_struct(row: &Row) -> Result<TableItem, Error> {
     let category_ = handle_error("category", row)?;
     let quantity_ = handle_error("quantity", row)?;
     let order_ = row.get("time");
-    let sumary = TableItem {
+    let sumary = OrderItem {
         id: id_,
         table_id: table_id_,
         name: name_,
@@ -107,7 +107,7 @@ pub fn get_items(conn: &PgPool) -> Result<Vec<Item>, Error> {
     Ok(tables)
 }
 
-pub fn get_table_items(conn: &PgPool, table_id: i32) -> Result<Vec<TableItem>, Error> {
+pub fn get_order_items(conn: &PgPool, table_id: i32) -> Result<Vec<OrderItem>, Error> {
     let mut tables = Vec::new();
     let conn = conn.get()?;
     let query = r#"
