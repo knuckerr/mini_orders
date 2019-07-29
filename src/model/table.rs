@@ -164,7 +164,7 @@ pub fn update_table(conn: &PgPool,table:&Table) -> Result<Msg, Error> {
 pub fn generate_table(conn: &PgPool, from: i32, to: i32) -> Result<Vec<Msg>, Error> {
     let conn = conn.get()?;
     let mut msgs = Vec::new();
-    if from <= 100 && to >= 0 {
+    if from <= 1000 && to >= 0 {
         for name in from..=to {
             let exist = conn.query("SELECT * FROM tables WHERE name=$1", &[&name.to_string()])?;
             if exist.into_iter().len() == 0 {
