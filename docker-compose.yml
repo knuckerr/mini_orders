@@ -3,26 +3,21 @@ services:
     adminer:
         image:
             dockette/adminer:full
-        container_name: "adminer"
         restart:
             always
         ports:
             - "8088:80"
+
     dbPostgres:
         image: postgres:10
-        container_name: "postgres"
         restart: always
-        ports:
-            - "5432:5432"
         environment:
             POSTGRES_USER: root
             POSTGRES_PASSWORD: root
             POSTGRES_DB: common
+
     redis:
-        container_name: "redis"
         image: redis
-        ports:
-          - "6379:6379"
         volumes:
           - ../data/redis:/data
         entrypoint: redis-server --appendonly yes
